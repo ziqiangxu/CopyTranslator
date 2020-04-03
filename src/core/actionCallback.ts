@@ -6,7 +6,7 @@ import { decompose } from "../tools/action";
 import { showSettings } from "../tools/views";
 import { Identifier, NormalActionType, RouteActionType } from "../tools/types";
 
-const clipboard = require("electron-clipboard-extended");
+// const clipboard = require("electron-clipboard-extended");
 
 function handleActions(
   id: string,
@@ -62,10 +62,10 @@ function handleNormalAction(identifier: NormalActionType | RouteActionType) {
       controller.clear();
       break;
     case "copySource":
-      clipboard.writeText(controller.src);
+      // clipboard.writeText(controller.src);
       break;
     case "copyResult":
-      clipboard.writeText(controller.result);
+      // clipboard.writeText(controller.result);
       break;
     case "settings":
       showSettings();

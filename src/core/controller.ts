@@ -25,7 +25,7 @@ import {
   DictFail
 } from "../tools/dictionary/types";
 import { showDragCopyWarning } from "../tools/views/dialog";
-const clipboard = require("electron-clipboard-extended");
+// const clipboard = require("electron-clipboard-extended");
 
 class Controller {
   src: string = "";
@@ -43,6 +43,7 @@ class Controller {
   translating: boolean = false; //正在翻译
   exited: boolean = false; //已经退出
   words: string = "";
+  clipboard:any = undefined;
 
   constructor() {
     this.config.loadValues(env.configPath);
@@ -99,7 +100,9 @@ class Controller {
   }
 
   checkClipboard() {
-    let originalText = clipboard.readText();
+    if (this.clipboard == undefined) return;
+
+    let originalText = this.clipboard.readText();
     if (!this.checkLength(originalText)) {
       return;
     }
@@ -114,6 +117,7 @@ class Controller {
       if (clear) {
         this.clear();
       }
+      console.debug("msg from debug: ", text);
       this.doTranslate(normalizeAppend(text, this.get<boolean>("autoPurify")));
     }
   }
@@ -164,13 +168,15 @@ class Controller {
   }
 
   postProcess(language: any, result: CopyTranslateResult) {
+    if (this.clipboard == undefined) return;
+
     if (this.get<boolean>("autoCopy")) {
-      clipboard.writeText(this.result);
+      this.clipboard.writeText(this.result);
       if (this.get<boolean>("autoPaste")) {
         simulate.paste();
       }
     } else if (this.get<boolean>("autoFormat")) {
-      clipboard.writeText(this.src);
+      this.clipboard.writeText(this.src);
     }
     if (this.get<boolean>("autoShow")) {
       this.win.edgeShow();
@@ -291,6 +297,7 @@ class Controller {
       this.tryQueryDictionary(text)
     ]).then(() => {
       this.translating = false;
+      console.debug("result got: ", this.dictResult, this.src, this.dictResult.valid)
       if (this.dictResult.words === this.src && !this.dictResult.valid) {
         //同步词典结果
         this.syncDict(); //翻译完了，然后发现词典有问题，这个时候才发送
@@ -325,6 +332,7 @@ class Controller {
 
   async tryQueryDictionary(text: string) {
     this.dictFail("");
+    console.debug("tryQueryDictionary: ", text);
     this.syncDict();
     if (
       !this.get("smartDict") ||
@@ -439,17 +447,22 @@ class Controller {
   }
 
   setWatch(watch: boolean) {
+    if (this.clipboard == undefined) return;
+
     if (watch) {
-      clipboard.on("text-changed", () => {
+      console.log('bind text changed event', this.clipboard);
+      
+      this.clipboard.on("text-changed", () => {
+        console.log('the this.clipboard changed.=======', this.clipboard.readText());
         this.checkClipboard();
       });
-      clipboard.on("image-changed", () => {
+      this.clipboard.on("image-changed", () => {
         // OCR 相关TranslateResult
-        recognizer.recognize(clipboard.readImage().toDataURL());
+        recognizer.recognize(this.clipboard.readImage().toDataURL());
       });
-      clipboard.startWatching();
+      this.clipboard.startWatching();
     } else {
-      clipboard.stopWatching();
+      this.clipboard.stopWatching();
     }
   }
 
@@ -492,6 +505,7 @@ class Controller {
   postSet(identifier: Identifier, value: any, save = true, refresh = true) {
     switch (identifier) {
       case "listenClipboard":
+        console.log('msg from debug, listenClipboard:', value);
         this.setWatch(value);
         break;
       case "targetLanguage":

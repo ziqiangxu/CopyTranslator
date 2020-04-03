@@ -1,5 +1,5 @@
 "use strict";
-import { app, protocol } from "electron";
+import { app, protocol, BrowserWindow } from "electron";
 import { installVueDevtools } from "vue-cli-plugin-electron-builder/lib";
 import { Controller } from "./core/controller";
 import { recognizer } from "./tools/ocr";
@@ -40,9 +40,11 @@ app.commandLine.appendSwitch("--disable-http-cache");
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", async () => {
+  controller.clipboard = require("electron-clipboard-extended");
   if (isDevelopment && !process.env.IS_TEST) {
     // Install Vue Devtools
-    await installVueDevtools();
+    // await installVueDevtools();
+    BrowserWindow.addDevToolsExtension("./vue-devtools")
   }
   const shortcutCapture = new ShortcutCapture();
   (<any>global).shortcutCapture = shortcutCapture;
