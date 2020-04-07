@@ -8,7 +8,7 @@ if (global.process.platform == "linux") {
     'For the first time, perform "sudo groupmens -g input $USER" at the terminal, then logout and log back into the desktop environment, to listen for mouse events globally. \
     \nNote: dragCopy of the Linux version does not actually copy the selected text to the clipboard.';
   zhWarning =
-    "首次使用此功能请在终端执行”sudo groupmens -g input $USER“，然后重新登录桌面环境，以便全局监听鼠标事件。\
+    "首次使用此功能请在终端执行“sudo groupmens -g input $USER”，然后重新登录桌面环境，以便全局监听鼠标事件。\
     \n注意：Linux版本的 “拖拽复制” 实际上并不会将选中的文本复制到剪切板。";
 } else {
   enWarning =
